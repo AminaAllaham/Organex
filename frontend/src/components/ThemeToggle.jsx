@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 
-type ThemeMode = 'light' | 'dark' | 'auto'
-
-function getInitialMode(): ThemeMode {
+function getInitialMode() {
   if (typeof window === 'undefined') {
     return 'auto'
   }
@@ -15,7 +13,7 @@ function getInitialMode(): ThemeMode {
   return 'auto'
 }
 
-function applyThemeMode(mode: ThemeMode) {
+function applyThemeMode(mode) {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
   const resolved = mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode
 
@@ -32,7 +30,7 @@ function applyThemeMode(mode: ThemeMode) {
 }
 
 export default function ThemeToggle() {
-  const [mode, setMode] = useState<ThemeMode>('auto')
+  const [mode, setMode] = useState('auto')
 
   useEffect(() => {
     const initialMode = getInitialMode()
@@ -55,7 +53,7 @@ export default function ThemeToggle() {
   }, [mode])
 
   function toggleMode() {
-    const nextMode: ThemeMode =
+    const nextMode =
       mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light'
     setMode(nextMode)
     applyThemeMode(nextMode)
