@@ -1,10 +1,8 @@
-const pool = require("./db");
-
-pool.query("SELECT NOW()")
-  .then(res => console.log("✅ DB Connected:", res.rows[0]))
-  .catch(err => console.error("❌ DB Error:", err.message));
 const express = require("express");
 const cors = require("cors");
+const { verifyFirebaseConnection } = require("./firebase");
+
+verifyFirebaseConnection();
 
 const app = express();
 app.use(cors());

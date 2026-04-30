@@ -1,16 +1,86 @@
-# React + Vite
+# Organex
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A digital library and resource management tool for self-directed learners. Save, organize, search, and retrieve learning resources (links, articles, videos, PDFs) in one place — with collections, tags, and personal notes.
 
-Currently, two official plugins are available:
+> Graduation project. Solo developer.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
 
-## React Compiler
+**Frontend**
+- React 19 + Vite 7
+- TanStack Router (file-based routing)
+- Tailwind CSS v4
+- shadcn/ui (style: new-york)
+- React Hook Form + Zod
+- Sonner (toasts)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Backend**
+- Firebase Authentication (email/password)
+- Cloud Firestore (database)
+- Firebase Storage (avatars)
+- Express (minimal — admin SDK setup only)
 
-## Expanding the ESLint configuration
+**Hosting**
+- Vercel (frontend)
+- Firebase (backend services)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Project Structure
+
+```
+Organex/                  npm workspaces monorepo
+├── backend/              Express + Firebase Admin
+│   ├── index.js          Server entry (port 5000)
+│   ├── firebase.js       Firebase Admin SDK init
+│   └── .env              Firebase service account credentials
+└── frontend/             Vite + React + TanStack Router
+    └── src/
+        ├── main.jsx
+        ├── routes/       File-based routes
+        ├── components/   shadcn UI + project components
+        ├── firebase/     Firebase client SDK
+        ├── hooks/
+        └── lib/
+```
+
+## Setup
+
+### Prerequisites
+- Node.js 18+
+- A Firebase project with Authentication, Firestore, and Storage enabled
+
+### Install dependencies
+```bash
+npm run install:all
+```
+
+### Configure environment
+
+Create `backend/.env` with your Firebase Admin credentials:
+```env
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=your-service-account-email
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+```
+
+Create `frontend/.env` with your Firebase client config:
+```env
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MSG_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_MEASUREMENT_ID=
+```
+
+### Run
+
+```bash
+npm run dev              # frontend (3000) + backend (5000)
+npm run dev:frontend     # frontend only
+npm run dev:backend      # backend only
+```
+
+## Status
+
+Early development. Core MVP features in progress: authentication, resources CRUD, library view, collections, tags, search, profile.

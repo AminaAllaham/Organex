@@ -5,7 +5,16 @@
       "Bash(npx shadcn@latest add form --yes)",
       "Bash(yes \"n\")",
       "Bash(npx shadcn@latest add form)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(timeout 10 npm --workspace backend run dev)",
+      "Bash(node test-firebase.js)",
+      "Bash(curl -sf \"http://localhost:3002/src/main.jsx\" -o /dev/null)",
+      "Bash(curl -sf \"http://localhost:3002/src/components/ui/Header.jsx\" -o /dev/null)",
+      "Bash(curl -sf \"http://localhost:3002/src/hooks/useAuth.jsx\" -o /dev/null)",
+      "Bash(curl -sf \"http://localhost:3002/src/components/auth/ProtectedRoute.jsx\" -o /dev/null)",
+      "Bash(curl -sf \"http://localhost:3002/src/routes/resources.new.jsx\" -o /dev/null)",
+      "Bash(curl -sf \"http://localhost:3002/src/lib/resources.js\" -o /dev/null)",
+      "Bash(curl -sf \"http://localhost:3002/resources/new\" -o /tmp/new_page.html)"
     ]
   }
 }

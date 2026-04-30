@@ -22,6 +22,8 @@ const config = defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // shadcn components were generated with absolute "src/..." imports
+      src: fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
 })
