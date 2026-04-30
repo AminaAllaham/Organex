@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx shadcn@latest add input)",
+      "Bash(npx shadcn@latest add form --yes)",
+      "Bash(yes \"n\")",
+      "Bash(npx shadcn@latest add form)",
+      "Bash(npm install *)"
+    ]
+  }
+}

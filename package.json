@@ -1,5 +1,5 @@
 {
-  "name": "lms",
+  "name": "organex",
   "private": true,
   "workspaces": [
     "frontend",
