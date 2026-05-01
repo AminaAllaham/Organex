@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
 import {
   Select,
@@ -15,7 +16,9 @@ import { Toggle } from '@/components/ui/toggle'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import ResourceCard from '@/components/library/ResourceCard'
 import { useAuth } from '@/hooks/useAuth'
-import { listResources } from '@/lib/resources'
+import { listResources, toggleStar } from '@/lib/resources'
+import { listTags } from '@/lib/tags'
+import { listCollections } from '@/lib/collections'
 import { RESOURCE_TYPES } from '@/lib/validations'
 
 export const Route = createFileRoute('/library')({ component: LibraryPage })
@@ -31,9 +34,13 @@ function LibraryPage() {
 function Library() {
   const { user } = useAuth()
   const [resources, setResources] = useState([])
+  const [tags, setTags] = useState([])
+  const [collections, setCollections] = useState([])
   const [status, setStatus] = useState('loading') // 'loading' | 'ready' | 'error'
 
   const [typeFilter, setTypeFilter] = useState('all')
+  const [tagFilter, setTagFilter] = useState('all')
+  const [collectionFilter, setCollectionFilter] = useState('all')
   const [starredOnly, setStarredOnly] = useState(false)
   const [sortOrder, setSortOrder] = useState('newest')
 
@@ -45,10 +52,12 @@ function Library() {
     if (!user) return
     let cancelled = false
     setStatus('loading')
-    listResources()
-      .then((data) => {
+    Promise.all([listResources(), listTags(), listCollections()])
+      .then(([r, t, c]) => {
         if (cancelled) return
-        setResources(data)
+        setResources(r)
+        setTags(t)
+        setCollections(c)
         setStatus('ready')
       })
       .catch((err) => {
@@ -61,15 +70,35 @@ function Library() {
     }
   }, [user])
 
+  async function handleStarToggle(resource) {
+    const { id, isStarred } = resource
+    setResources((rs) =>
+      rs.map((r) => (r.id === id ? { ...r, isStarred: !isStarred } : r)),
+    )
+    try {
+      await toggleStar(id, isStarred)
+    } catch (err) {
+      console.error(err)
+      setResources((rs) =>
+        rs.map((r) => (r.id === id ? { ...r, isStarred } : r)),
+      )
+      toast.error('Failed to update star.')
+    }
+  }
+
   const visible = useMemo(() => {
     let list = resources
     if (typeFilter !== 'all') list = list.filter((r) => r.resourceType === typeFilter)
+    if (collectionFilter !== 'all')
+      list = list.filter((r) => (r.collectionIds || []).includes(collectionFilter))
+    if (tagFilter !== 'all')
+      list = list.filter((r) => (r.tagIds || []).includes(tagFilter))
     if (starredOnly) list = list.filter((r) => r.isStarred)
     if (sortOrder === 'oldest') {
       list = [...list].reverse()
     }
     return list
-  }, [resources, typeFilter, starredOnly, sortOrder])
+  }, [resources, typeFilter, collectionFilter, tagFilter, starredOnly, sortOrder])
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
@@ -103,6 +132,52 @@ function Library() {
               ))}
             </SelectContent>
           </Select>
+
+          {collections.length > 0 && (
+            <Select value={collectionFilter} onValueChange={setCollectionFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All collections</SelectItem>
+                {collections.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: c.color || '#6366f1' }}
+                        aria-hidden
+                      />
+                      {c.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {tags.length > 0 && (
+            <Select value={tagFilter} onValueChange={setTagFilter}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All tags</SelectItem>
+                {tags.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: t.color || '#94a3b8' }}
+                        aria-hidden
+                      />
+                      {t.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
           <Select value={sortOrder} onValueChange={setSortOrder}>
             <SelectTrigger className="w-[140px]">
@@ -153,7 +228,12 @@ function Library() {
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {visible.map((r) => (
               <li key={r.id}>
-                <ResourceCard resource={r} />
+                <ResourceCard
+                  resource={r}
+                  tags={tags}
+                  collections={collections}
+                  onStarToggle={handleStarToggle}
+                />
               </li>
             ))}
           </ul>

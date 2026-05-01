@@ -49,7 +49,7 @@ function SignupPage() {
     try {
       await signUp(values)
       toast.success('Account created. Welcome to Organex!')
-      navigate({ to: '/' })
+      navigate({ to: '/onboarding' })
     } catch (err) {
       toast.error(authErrorMessage(err.code))
     } finally {

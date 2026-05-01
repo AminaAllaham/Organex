@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -24,7 +24,11 @@ import {
 } from '@/components/ui/select'
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import PillPicker from '@/components/library/PillPicker'
+import { useAuth } from '@/hooks/useAuth'
 import { addResource } from '@/lib/resources'
+import { listTags } from '@/lib/tags'
+import { listCollections } from '@/lib/collections'
 import { resourceSchema, RESOURCE_TYPES } from '@/lib/validations'
 
 export const Route = createFileRoute('/resources/new')({ component: AddResourcePage })
@@ -48,7 +52,25 @@ function AddResourcePage() {
 
 function AddResourceForm() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [submitting, setSubmitting] = useState(false)
+  const [tags, setTags] = useState([])
+  const [collections, setCollections] = useState([])
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    Promise.all([listTags(), listCollections()])
+      .then(([t, c]) => {
+        if (cancelled) return
+        setTags(t)
+        setCollections(c)
+      })
+      .catch((err) => console.error(err))
+    return () => {
+      cancelled = true
+    }
+  }, [user])
 
   const form = useForm({
     resolver: zodResolver(resourceSchema),
@@ -57,6 +79,8 @@ function AddResourceForm() {
       title: '',
       description: '',
       resourceType: 'link',
+      tagIds: [],
+      collectionIds: [],
     },
   })
 
@@ -153,6 +177,68 @@ function AddResourceForm() {
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="collectionIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Collections (optional)</FormLabel>
+                <FormControl>
+                  <PillPicker
+                    items={collections}
+                    selectedIds={field.value || []}
+                    onChange={field.onChange}
+                    placeholder="Add a collection"
+                    emptyMessage={
+                      <span>
+                        No collections yet.{' '}
+                        <Link
+                          to="/collections"
+                          className="font-medium text-foreground hover:underline"
+                        >
+                          Create one
+                        </Link>
+                        .
+                      </span>
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="tagIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tags (optional)</FormLabel>
+                <FormControl>
+                  <PillPicker
+                    items={tags}
+                    selectedIds={field.value || []}
+                    onChange={field.onChange}
+                    placeholder="Add a tag"
+                    emptyMessage={
+                      <span>
+                        No tags yet.{' '}
+                        <Link
+                          to="/tags"
+                          className="font-medium text-foreground hover:underline"
+                        >
+                          Create one
+                        </Link>
+                        .
+                      </span>
+                    }
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

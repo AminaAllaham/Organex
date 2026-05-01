@@ -9,6 +9,20 @@ export const collectionSchema = z.object({
     .max(100, 'Name is too long'),
 })
 
+export const tagSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(50, 'Name is too long'),
+})
+
+export const profileSchema = z.object({
+  displayName: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(50, 'Name is too long'),
+})
+
 export const resourceSchema = z.object({
   url: z.string().url('Enter a valid URL'),
   title: z
@@ -17,6 +31,21 @@ export const resourceSchema = z.object({
     .max(200, 'Title is too long'),
   description: z.string().max(1000, 'Description is too long').optional(),
   resourceType: z.enum(RESOURCE_TYPES),
+  tagIds: z.array(z.string()).default([]),
+  collectionIds: z.array(z.string()).default([]),
+})
+
+export const resourceUpdateSchema = z.object({
+  url: z.string().url('Enter a valid URL'),
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title is too long'),
+  description: z.string().max(1000, 'Description is too long').optional(),
+  resourceType: z.enum(RESOURCE_TYPES),
+  personalNotes: z.string().max(5000, 'Notes are too long').optional(),
+  tagIds: z.array(z.string()).default([]),
+  collectionIds: z.array(z.string()).default([]),
 })
 
 export const loginSchema = z.object({

@@ -45,6 +45,20 @@ export default function Header() {
             >
               Collections
             </Link>
+            <Link
+              to="/tags"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              activeProps={{ className: 'bg-muted text-foreground' }}
+            >
+              Tags
+            </Link>
+            <Link
+              to="/search"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              activeProps={{ className: 'bg-muted text-foreground' }}
+            >
+              Search
+            </Link>
           </div>
         )}
 
@@ -53,9 +67,12 @@ export default function Header() {
 
           {!loading && user && (
             <>
-              <span className="hidden text-sm text-muted-foreground sm:inline">
+              <Link
+                to="/profile"
+                className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+              >
                 {user.displayName || user.email}
-              </span>
+              </Link>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 Sign out
               </Button>
