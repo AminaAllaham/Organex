@@ -7,6 +7,7 @@ import {
   updateDoc,
   deleteDoc,
   query,
+  where,
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore'
@@ -91,6 +92,26 @@ export async function listResources() {
   const q = query(
     resourcesRef(user.uid),
     orderBy('createdAt', 'desc')
+  )
+
+  const snapshot = await getDocs(q)
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }))
+}
+
+export async function listResourcesByCollection(collectionId) {
+  const user = auth.currentUser
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  const q = query(
+    resourcesRef(user.uid),
+    where('collectionIds', 'array-contains', collectionId),
   )
 
   const snapshot = await getDocs(q)
