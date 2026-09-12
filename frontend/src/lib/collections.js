@@ -2,6 +2,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
   query,
@@ -27,6 +28,20 @@ export async function listCollections() {
   const q = query(collectionsRef(user.uid), orderBy('createdAt', 'desc'))
   const snap = await getDocs(q)
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+export async function getCollection(id) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Not authenticated')
+
+  const snap = await getDoc(collectionDoc(user.uid, id))
+
+  if (!snap.exists()) return null
+
+  return {
+    id: snap.id,
+    ...snap.data(),
+  }
 }
 
 export async function createCollection({ name, color = '#6366f1' }) {

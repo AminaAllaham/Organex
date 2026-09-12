@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     db: { name: 'mock-db' },
     collection: vi.fn(),
     getDocs: vi.fn(),
+    getDoc: vi.fn(),
     doc: vi.fn(),
     query: vi.fn(),
     where: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('firebase/firestore', () => ({
     collection: mocks.collection,
     addDoc: vi.fn(),
     getDocs: mocks.getDocs,
+    getDoc: mocks.getDoc,
     doc: mocks.doc,
     updateDoc: vi.fn(),
     query: mocks.query,
@@ -36,7 +38,7 @@ vi.mock('@/firebase/config', () => ({
     db: mocks.db,
 }))
 
-import { deleteCollection } from './collections'
+import { deleteCollection, getCollection } from './collections'
 
 const user = { uid: 'user-123' }
 const collectionId = 'collection-456'
@@ -211,5 +213,61 @@ describe('deleteCollection', () => {
         expect(batch.delete.mock.calls[0][0]).toEqual({
             path: `users/${user.uid}/collections/${collectionId}`,
         })
+    })
+})
+
+describe('getCollection', () => {
+    it('rejects when the user is not authenticated without reading Firestore', async () => {
+        mocks.auth.currentUser = null
+
+        await expect(getCollection(collectionId)).rejects.toThrow(
+            'Not authenticated',
+        )
+
+        expect(mocks.getDoc).not.toHaveBeenCalled()
+    })
+
+    it('returns an existing collection with its document ID', async () => {
+        const storedData = {
+            name: 'Research',
+            description: 'Reading list',
+            color: '#6366f1',
+        }
+        const collectionReference = {
+            path: `users/${user.uid}/collections/${collectionId}`,
+        }
+
+        mocks.doc.mockReturnValue(collectionReference)
+        mocks.getDoc.mockResolvedValue({
+            id: collectionId,
+            exists: () => true,
+            data: () => storedData,
+        })
+
+        await expect(getCollection(collectionId)).resolves.toEqual({
+            id: collectionId,
+            ...storedData,
+        })
+
+        expect(mocks.getDoc).toHaveBeenCalledTimes(1)
+        expect(mocks.getDoc).toHaveBeenCalledWith(collectionReference)
+        expect(mocks.doc).toHaveBeenCalledWith(
+            mocks.db,
+            'users',
+            user.uid,
+            'collections',
+            collectionId,
+        )
+    })
+
+    it('returns null when the collection does not exist', async () => {
+        mocks.doc.mockReturnValue({
+            path: `users/${user.uid}/collections/${collectionId}`,
+        })
+        mocks.getDoc.mockResolvedValue({
+            exists: () => false,
+        })
+
+        await expect(getCollection(collectionId)).resolves.toBeNull()
     })
 })
