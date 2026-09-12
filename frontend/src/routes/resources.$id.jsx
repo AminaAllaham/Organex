@@ -49,6 +49,7 @@ import { useAuth } from '@/hooks/useAuth'
 import {
   getResource,
   getSecurePdfAccessUrl,
+  deleteSecurePdfResource,
   updateResource,
   deleteResource,
   toggleStar,
@@ -230,7 +231,11 @@ function ResourceDetail() {
   async function handleDelete() {
     setDeleting(true)
     try {
-      await deleteResource(id)
+      if (resource.resourceType === 'pdf') {
+        await deleteSecurePdfResource(id)
+      } else {
+        await deleteResource(id)
+      }
       toast.success('Resource deleted')
       navigate({ to: '/library' })
     } catch (err) {

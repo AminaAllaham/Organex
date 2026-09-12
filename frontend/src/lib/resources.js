@@ -175,6 +175,60 @@ export async function getSecurePdfAccessUrl(resourceId, action = 'view') {
   return data
 }
 
+export async function deleteSecurePdfResource(resourceId) {
+  const user = auth.currentUser
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  if (typeof resourceId !== 'string' || !resourceId.trim()) {
+    throw new Error('Invalid resource ID')
+  }
+
+  const token = await user.getIdToken()
+  const response = await fetch('/api/pdf-delete', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      resourceId,
+    }),
+  })
+
+  if (!response.ok) {
+    let errorMessage = 'Unable to delete PDF'
+
+    try {
+      const errorData = await response.json()
+
+      if (typeof errorData?.error === 'string' && errorData.error.trim()) {
+        errorMessage = errorData.error
+      }
+    } catch {
+      // Use the friendly fallback when the API response is not JSON.
+    }
+
+    throw new Error(errorMessage)
+  }
+
+  let data
+
+  try {
+    data = await response.json()
+  } catch {
+    throw new Error('Invalid PDF delete response')
+  }
+
+  if (data?.success !== true) {
+    throw new Error('Invalid PDF delete response')
+  }
+
+  return data
+}
+
 export async function updateResource(id, data) {
   const user = auth.currentUser
 
