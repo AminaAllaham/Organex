@@ -122,6 +122,26 @@ export async function listResourcesByCollection(collectionId) {
   }))
 }
 
+export async function listResourcesByTag(tagId) {
+  const user = auth.currentUser
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  const q = query(
+    resourcesRef(user.uid),
+    where('tagIds', 'array-contains', tagId),
+  )
+
+  const snapshot = await getDocs(q)
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }))
+}
+
 export async function getResource(id) {
   const user = auth.currentUser
 
