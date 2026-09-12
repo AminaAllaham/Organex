@@ -10,6 +10,7 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore'
+
 import { auth, db } from '@/firebase/config'
 
 function resourcesRef(uid) {
@@ -22,6 +23,7 @@ function resourceDoc(uid, id) {
 
 function deriveSourceDomain(url) {
   if (!url) return ''
+
   try {
     return new URL(url).hostname.replace(/^www\./, '')
   } catch {
@@ -31,20 +33,48 @@ function deriveSourceDomain(url) {
 
 export async function addResource(data) {
   const user = auth.currentUser
-  if (!user) throw new Error('Not authenticated')
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  const isPdf = data.resourceType === 'pdf'
 
   const docRef = await addDoc(resourcesRef(user.uid), {
-    url: data.url,
+    url: isPdf ? '' : data.url || '',
+
     title: data.title,
+
     description: data.description || '',
+
     thumbnailUrl: '',
+
     resourceType: data.resourceType || 'link',
-    sourceDomain: deriveSourceDomain(data.url),
+
+    sourceDomain: isPdf ? '' : deriveSourceDomain(data.url),
+
     personalNotes: '',
+
     isStarred: false,
+
     tagIds: data.tagIds || [],
+
     collectionIds: data.collectionIds || [],
+
+    file: isPdf
+      ? {
+        publicId: data.file?.publicId || '',
+        secureUrl: data.file?.secureUrl || '',
+        originalFilename: data.file?.originalFilename || '',
+        format: data.file?.format || 'pdf',
+        bytes: data.file?.bytes || 0,
+        resourceType: data.file?.resourceType || 'raw',
+        deliveryType: data.file?.deliveryType || 'authenticated',
+      }
+      : null,
+
     createdAt: serverTimestamp(),
+
     updatedAt: serverTimestamp(),
   })
 
@@ -53,28 +83,62 @@ export async function addResource(data) {
 
 export async function listResources() {
   const user = auth.currentUser
-  if (!user) throw new Error('Not authenticated')
 
-  const q = query(resourcesRef(user.uid), orderBy('createdAt', 'desc'))
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  const q = query(
+    resourcesRef(user.uid),
+    orderBy('createdAt', 'desc')
+  )
+
   const snapshot = await getDocs(q)
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }))
 }
 
 export async function getResource(id) {
   const user = auth.currentUser
-  if (!user) throw new Error('Not authenticated')
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
   const snap = await getDoc(resourceDoc(user.uid, id))
-  if (!snap.exists()) return null
-  return { id: snap.id, ...snap.data() }
+
+  if (!snap.exists()) {
+    return null
+  }
+
+  return {
+    id: snap.id,
+    ...snap.data(),
+  }
 }
 
 export async function updateResource(id, data) {
   const user = auth.currentUser
-  if (!user) throw new Error('Not authenticated')
 
-  const patch = { ...data, updatedAt: serverTimestamp() }
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  const patch = {
+    ...data,
+    updatedAt: serverTimestamp(),
+  }
+
   if ('url' in data) {
     patch.sourceDomain = deriveSourceDomain(data.url)
+  }
+
+  if (data.resourceType === 'pdf') {
+    patch.url = ''
+    patch.sourceDomain = ''
   }
 
   await updateDoc(resourceDoc(user.uid, id), patch)
@@ -82,10 +146,16 @@ export async function updateResource(id, data) {
 
 export async function deleteResource(id) {
   const user = auth.currentUser
-  if (!user) throw new Error('Not authenticated')
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
   await deleteDoc(resourceDoc(user.uid, id))
 }
 
 export async function toggleStar(id, currentStarred) {
-  return updateResource(id, { isStarred: !currentStarred })
+  return updateResource(id, {
+    isStarred: !currentStarred,
+  })
 }
