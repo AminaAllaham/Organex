@@ -4,9 +4,11 @@ import {
   getDocs,
   doc,
   updateDoc,
-  deleteDoc,
   query,
+  where,
   orderBy,
+  arrayRemove,
+  writeBatch,
   serverTimestamp,
 } from 'firebase/firestore'
 import { auth, db } from '@/firebase/config'
@@ -48,7 +50,27 @@ export async function renameCollection(id, name) {
 export async function deleteCollection(id) {
   const user = auth.currentUser
   if (!user) throw new Error('Not authenticated')
-  // Note: this leaves the collection's id in any resource's collectionIds[].
-  // We filter unknown ids at read time, so it's safe — cleanup can come later.
-  await deleteDoc(collectionDoc(user.uid, id))
+
+  const resourcesQuery = query(
+    collection(db, 'users', user.uid, 'resources'),
+    where('collectionIds', 'array-contains', id),
+  )
+  const resourcesSnapshot = await getDocs(resourcesQuery)
+
+  if (resourcesSnapshot.size > 499) {
+    throw new Error(
+      'Cannot delete a collection referenced by more than 499 resources'
+    )
+  }
+
+  const batch = writeBatch(db)
+
+  resourcesSnapshot.docs.forEach((resourceSnapshot) => {
+    batch.update(resourceSnapshot.ref, {
+      collectionIds: arrayRemove(id),
+    })
+  })
+
+  batch.delete(collectionDoc(user.uid, id))
+  await batch.commit()
 }
