@@ -3,7 +3,14 @@ import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, ExternalLink, FileText, Star, Trash2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  Download,
+  ExternalLink,
+  FileText,
+  Star,
+  Trash2,
+} from 'lucide-react'
 
 import {
   Form,
@@ -80,6 +87,7 @@ function ResourceDetail() {
   const [status, setStatus] = useState('loading')
   const [submitting, setSubmitting] = useState(false)
   const [openingPdf, setOpeningPdf] = useState(false)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [tags, setTags] = useState([])
@@ -175,6 +183,35 @@ function ResourceDetail() {
       toast.error('Unable to open PDF.')
     } finally {
       setOpeningPdf(false)
+    }
+  }
+
+  async function handleDownloadPdf() {
+    if (downloadingPdf) return
+
+    setDownloadingPdf(true)
+    let downloadWindow = null
+
+    try {
+      downloadWindow = window.open('', '_blank')
+
+      if (!downloadWindow) {
+        toast.error('Your browser blocked the download window.')
+        return
+      }
+
+      downloadWindow.opener = null
+      const result = await getSecurePdfAccessUrl(id, 'download')
+      downloadWindow.location.href = result.url
+    } catch (err) {
+      if (downloadWindow) {
+        downloadWindow.close()
+      }
+
+      console.error(err)
+      toast.error('Unable to download PDF.')
+    } finally {
+      setDownloadingPdf(false)
     }
   }
 
@@ -282,15 +319,26 @@ function ResourceDetail() {
       </div>
 
       {resource.resourceType === 'pdf' ? (
-        <Button
-          variant="outline"
-          className="mt-6 w-full"
-          onClick={handleOpenPdf}
-          disabled={openingPdf}
-        >
-          <FileText className="size-4" />
-          {openingPdf ? 'Opening PDF…' : 'Open PDF'}
-        </Button>
+        <div className="mt-6 grid gap-2 sm:grid-cols-2">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleOpenPdf}
+            disabled={openingPdf}
+          >
+            <FileText className="size-4" />
+            {openingPdf ? 'Opening PDF…' : 'Open PDF'}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleDownloadPdf}
+            disabled={downloadingPdf}
+          >
+            <Download className="size-4" />
+            {downloadingPdf ? 'Downloading…' : 'Download PDF'}
+          </Button>
+        </div>
       ) : (
         <Button asChild variant="outline" className="mt-6 w-full">
           <a href={resource.url} target="_blank" rel="noreferrer">
