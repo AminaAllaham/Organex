@@ -7,6 +7,13 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+const envPort = Number(process.env.PORT)
+
+const devPort =
+  Number.isInteger(envPort) && envPort > 0
+    ? envPort
+    : 3000
+
 const config = defineConfig({
   plugins: [
     devtools(),
@@ -19,6 +26,10 @@ const config = defineConfig({
     }),
     viteReact(),
   ],
+  server: {
+    port: devPort,
+    strictPort: Boolean(process.env.PORT),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
