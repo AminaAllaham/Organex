@@ -2,6 +2,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
   query,
@@ -27,6 +28,20 @@ export async function listTags() {
   const q = query(tagsRef(user.uid), orderBy('name', 'asc'))
   const snap = await getDocs(q)
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+export async function getTag(id) {
+  const user = auth.currentUser
+  if (!user) throw new Error('Not authenticated')
+
+  const snap = await getDoc(tagDoc(user.uid, id))
+
+  if (!snap.exists()) return null
+
+  return {
+    id: snap.id,
+    ...snap.data(),
+  }
 }
 
 export async function createTag({ name, color = '#94a3b8' }) {

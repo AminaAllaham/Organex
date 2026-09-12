@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     db: { name: 'mock-db' },
     collection: vi.fn(),
     getDocs: vi.fn(),
+    getDoc: vi.fn(),
     doc: vi.fn(),
     query: vi.fn(),
     where: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock('firebase/firestore', () => ({
     collection: mocks.collection,
     addDoc: vi.fn(),
     getDocs: mocks.getDocs,
+    getDoc: mocks.getDoc,
     doc: mocks.doc,
     updateDoc: vi.fn(),
     query: mocks.query,
@@ -36,7 +38,7 @@ vi.mock('@/firebase/config', () => ({
     db: mocks.db,
 }))
 
-import { deleteTag } from './tags'
+import { deleteTag, getTag } from './tags'
 
 const user = { uid: 'user-123' }
 const tagId = 'tag-456'
@@ -209,5 +211,60 @@ describe('deleteTag', () => {
         expect(batch.delete.mock.calls[0][0]).toEqual({
             path: `users/${user.uid}/tags/${tagId}`,
         })
+    })
+})
+
+describe('getTag', () => {
+    it('rejects when the user is not authenticated without reading Firestore', async () => {
+        mocks.auth.currentUser = null
+
+        await expect(getTag(tagId)).rejects.toThrow('Not authenticated')
+
+        expect(mocks.getDoc).not.toHaveBeenCalled()
+    })
+
+    it('returns an existing tag with its document ID', async () => {
+        const storedData = {
+            name: 'Typography',
+            color: '#94a3b8',
+        }
+        const tagReference = {
+            path: `users/${user.uid}/tags/${tagId}`,
+        }
+
+        mocks.doc.mockReturnValue(tagReference)
+        mocks.getDoc.mockResolvedValue({
+            id: tagId,
+            exists: () => true,
+            data: () => storedData,
+        })
+
+        await expect(getTag(tagId)).resolves.toEqual({
+            id: tagId,
+            ...storedData,
+        })
+
+        expect(mocks.getDoc).toHaveBeenCalledTimes(1)
+        expect(mocks.getDoc).toHaveBeenCalledWith(tagReference)
+        expect(mocks.doc).toHaveBeenCalledWith(
+            mocks.db,
+            'users',
+            user.uid,
+            'tags',
+            tagId,
+        )
+    })
+
+    it('returns null when the tag does not exist', async () => {
+        const tagReference = {
+            path: `users/${user.uid}/tags/${tagId}`,
+        }
+
+        mocks.doc.mockReturnValue(tagReference)
+        mocks.getDoc.mockResolvedValue({
+            exists: () => false,
+        })
+
+        await expect(getTag(tagId)).resolves.toBeNull()
     })
 })
