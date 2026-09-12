@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { ArrowLeft, ExternalLink, Star, Trash2 } from 'lucide-react'
+import { ArrowLeft, ExternalLink, FileText, Star, Trash2 } from 'lucide-react'
 
 import {
   Form,
@@ -41,6 +41,7 @@ import PillPicker from '@/components/library/PillPicker'
 import { useAuth } from '@/hooks/useAuth'
 import {
   getResource,
+  getSecurePdfAccessUrl,
   updateResource,
   deleteResource,
   toggleStar,
@@ -78,6 +79,7 @@ function ResourceDetail() {
   const [resource, setResource] = useState(null)
   const [status, setStatus] = useState('loading')
   const [submitting, setSubmitting] = useState(false)
+  const [openingPdf, setOpeningPdf] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [tags, setTags] = useState([])
@@ -144,6 +146,35 @@ function ResourceDetail() {
       toast.error('Failed to save changes.')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleOpenPdf() {
+    if (openingPdf) return
+
+    setOpeningPdf(true)
+    let pdfWindow = null
+
+    try {
+      pdfWindow = window.open('', '_blank')
+
+      if (!pdfWindow) {
+        toast.error('Your browser blocked the new tab.')
+        return
+      }
+
+      pdfWindow.opener = null
+      const result = await getSecurePdfAccessUrl(id, 'view')
+      pdfWindow.location.href = result.url
+    } catch (err) {
+      if (pdfWindow) {
+        pdfWindow.close()
+      }
+
+      console.error(err)
+      toast.error('Unable to open PDF.')
+    } finally {
+      setOpeningPdf(false)
     }
   }
 
@@ -250,12 +281,24 @@ function ResourceDetail() {
         </Button>
       </div>
 
-      <Button asChild variant="outline" className="mt-6 w-full">
-        <a href={resource.url} target="_blank" rel="noreferrer">
-          <ExternalLink className="size-4" />
-          Open original
-        </a>
-      </Button>
+      {resource.resourceType === 'pdf' ? (
+        <Button
+          variant="outline"
+          className="mt-6 w-full"
+          onClick={handleOpenPdf}
+          disabled={openingPdf}
+        >
+          <FileText className="size-4" />
+          {openingPdf ? 'Opening PDF…' : 'Open PDF'}
+        </Button>
+      ) : (
+        <Button asChild variant="outline" className="mt-6 w-full">
+          <a href={resource.url} target="_blank" rel="noreferrer">
+            <ExternalLink className="size-4" />
+            Open original
+          </a>
+        </Button>
+      )}
 
       <Form {...form}>
         <form

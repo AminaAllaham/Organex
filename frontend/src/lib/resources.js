@@ -120,6 +120,61 @@ export async function getResource(id) {
   }
 }
 
+export async function getSecurePdfAccessUrl(resourceId, action = 'view') {
+  const user = auth.currentUser
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  if (!['view', 'download'].includes(action)) {
+    throw new Error('Invalid PDF access action')
+  }
+
+  const token = await user.getIdToken()
+  const response = await fetch('/api/pdf-access', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      resourceId,
+      action,
+    }),
+  })
+
+  if (!response.ok) {
+    let errorMessage = 'Unable to access PDF'
+
+    try {
+      const errorData = await response.json()
+
+      if (typeof errorData?.error === 'string' && errorData.error.trim()) {
+        errorMessage = errorData.error
+      }
+    } catch {
+      // Use the friendly fallback when the API response is not JSON.
+    }
+
+    throw new Error(errorMessage)
+  }
+
+  let data
+
+  try {
+    data = await response.json()
+  } catch {
+    throw new Error('Invalid PDF access response')
+  }
+
+  if (typeof data?.url !== 'string' || !data.url.trim()) {
+    throw new Error('Invalid PDF access response')
+  }
+
+  return data
+}
+
 export async function updateResource(id, data) {
   const user = auth.currentUser
 
