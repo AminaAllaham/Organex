@@ -21,6 +21,7 @@ import { Route as TagsRouteImport } from './routes/tags'
 import { Route as CollectionsIdRouteImport } from './routes/collections_.$id'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
 import { Route as ResourcesNewRouteImport } from './routes/resources.new'
+import { Route as TagsIdRouteImport } from './routes/tags_.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +83,11 @@ const ResourcesNewRoute = ResourcesNewRouteImport.update({
   path: '/resources/new',
   getParentRoute: () => rootRouteImport,
 })
+const TagsIdRoute = TagsIdRouteImport.update({
+  id: '/tags_/$id',
+  path: '/tags/$id',
+  getParentRoute: () => rootRouteImport,
+})
 
 const rootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -96,5 +102,6 @@ const rootRouteChildren = {
   CollectionsIdRoute: CollectionsIdRoute,
   ResourcesIdRoute: ResourcesIdRoute,
   ResourcesNewRoute: ResourcesNewRoute,
+  TagsIdRoute: TagsIdRoute,
 }
 export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)
