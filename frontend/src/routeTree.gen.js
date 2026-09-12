@@ -9,51 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TagsRouteImport } from './routes/tags'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as LibraryRouteImport } from './routes/library'
-import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ResourcesNewRouteImport } from './routes/resources.new'
+import { Route as CollectionsRouteImport } from './routes/collections'
+import { Route as LibraryRouteImport } from './routes/library'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as TagsRouteImport } from './routes/tags'
+import { Route as CollectionsIdRouteImport } from './routes/collections_.$id'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
+import { Route as ResourcesNewRouteImport } from './routes/resources.new'
+import { Route as TagsIdRouteImport } from './routes/tags_.$id'
 
-const TagsRoute = TagsRouteImport.update({
-  id: '/tags',
-  path: '/tags',
-  getParentRoute: () => rootRouteImport,
-})
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-})
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => rootRouteImport,
-})
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-})
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-})
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-})
-const LibraryRoute = LibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 })
 const CollectionsRoute = CollectionsRouteImport.update({
@@ -61,9 +33,49 @@ const CollectionsRoute = CollectionsRouteImport.update({
   path: '/collections',
   getParentRoute: () => rootRouteImport,
 })
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+})
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+})
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+})
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+})
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+})
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+})
+const TagsRoute = TagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => rootRouteImport,
+})
+const CollectionsIdRoute = CollectionsIdRouteImport.update({
+  id: '/collections_/$id',
+  path: '/collections/$id',
+  getParentRoute: () => rootRouteImport,
+})
+const ResourcesIdRoute = ResourcesIdRouteImport.update({
+  id: '/resources/$id',
+  path: '/resources/$id',
   getParentRoute: () => rootRouteImport,
 })
 const ResourcesNewRoute = ResourcesNewRouteImport.update({
@@ -71,9 +83,9 @@ const ResourcesNewRoute = ResourcesNewRouteImport.update({
   path: '/resources/new',
   getParentRoute: () => rootRouteImport,
 })
-const ResourcesIdRoute = ResourcesIdRouteImport.update({
-  id: '/resources/$id',
-  path: '/resources/$id',
+const TagsIdRoute = TagsIdRouteImport.update({
+  id: '/tags_/$id',
+  path: '/tags/$id',
   getParentRoute: () => rootRouteImport,
 })
 
@@ -87,7 +99,9 @@ const rootRouteChildren = {
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
   TagsRoute: TagsRoute,
+  CollectionsIdRoute: CollectionsIdRoute,
   ResourcesIdRoute: ResourcesIdRoute,
   ResourcesNewRoute: ResourcesNewRoute,
+  TagsIdRoute: TagsIdRoute,
 }
 export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)

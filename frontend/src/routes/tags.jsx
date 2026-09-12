@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -127,7 +127,13 @@ function Tags() {
                   style={{ backgroundColor: t.color || '#94a3b8' }}
                   aria-hidden
                 />
-                <span className="font-medium">{t.name}</span>
+                <Link
+                  to="/tags/$id"
+                  params={{ id: t.id }}
+                  className="font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {t.name}
+                </Link>
                 <Button
                   variant="ghost"
                   size="icon-xs"
