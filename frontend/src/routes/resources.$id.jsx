@@ -25,13 +25,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -56,7 +49,7 @@ import {
 } from '@/lib/resources'
 import { listTags } from '@/lib/tags'
 import { listCollections } from '@/lib/collections'
-import { resourceUpdateSchema, RESOURCE_TYPES } from '@/lib/validations'
+import { resourceUpdateSchema } from '@/lib/validations'
 
 export const Route = createFileRoute('/resources/$id')({
   component: ResourceDetailPage,
@@ -146,9 +139,14 @@ function ResourceDetail() {
   async function onSubmit(values) {
     setSubmitting(true)
     try {
-      await updateResource(id, values)
-      setResource((r) => ({ ...r, ...values }))
-      form.reset(values)
+      const updateValues = {
+        ...values,
+        resourceType: resource.resourceType,
+      }
+
+      await updateResource(id, updateValues)
+      setResource((r) => ({ ...r, ...updateValues }))
+      form.reset(updateValues)
       toast.success('Changes saved')
     } catch (err) {
       console.error(err)
@@ -372,19 +370,21 @@ function ResourceDetail() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL</FormLabel>
-                <FormControl>
-                  <Input type="url" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {resource.resourceType !== 'pdf' && (
+            <FormField
+              control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL</FormLabel>
+                  <FormControl>
+                    <Input type="url" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
@@ -400,30 +400,15 @@ function ResourceDetail() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="resourceType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {RESOURCE_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {TYPE_LABELS[t]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <FormItem>
+            <FormLabel>Resource type</FormLabel>
+            <div className="rounded-md border border-input bg-muted/30 px-3 py-2 text-sm">
+              {TYPE_LABELS[resource.resourceType] ?? 'Other'}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Resource type cannot be changed after creation.
+            </p>
+          </FormItem>
 
           <FormField
             control={form.control}
