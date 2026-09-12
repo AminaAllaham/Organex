@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -134,7 +134,13 @@ function Collections() {
                         aria-hidden
                       />
                       <CardTitle className="truncate text-base">
-                        {c.name}
+                        <Link
+                          to="/collections/$id"
+                          params={{ id: c.id }}
+                          className="transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          {c.name}
+                        </Link>
                       </CardTitle>
                     </div>
                     <div className="flex shrink-0 gap-1">
