@@ -229,6 +229,60 @@ export async function deleteSecurePdfResource(resourceId) {
   return data
 }
 
+export async function cleanupSecurePdfUpload(publicId) {
+  const user = auth.currentUser
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  if (typeof publicId !== 'string' || !publicId.trim()) {
+    throw new Error('Invalid public ID')
+  }
+
+  const token = await user.getIdToken()
+  const response = await fetch('/api/pdf-cleanup', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      publicId,
+    }),
+  })
+
+  if (!response.ok) {
+    let errorMessage = 'Unable to clean up PDF'
+
+    try {
+      const errorData = await response.json()
+
+      if (typeof errorData?.error === 'string' && errorData.error.trim()) {
+        errorMessage = errorData.error
+      }
+    } catch {
+      // Use the friendly fallback when the API response is not JSON.
+    }
+
+    throw new Error(errorMessage)
+  }
+
+  let data
+
+  try {
+    data = await response.json()
+  } catch {
+    throw new Error('Invalid PDF cleanup response')
+  }
+
+  if (data?.success !== true) {
+    throw new Error('Invalid PDF cleanup response')
+  }
+
+  return data
+}
+
 export async function updateResource(id, data) {
   const user = auth.currentUser
 

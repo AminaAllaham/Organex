@@ -26,7 +26,10 @@ import {
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import PillPicker from '@/components/library/PillPicker'
 import { useAuth } from '@/hooks/useAuth'
-import { addResource } from '@/lib/resources'
+import {
+  addResource,
+  cleanupSecurePdfUpload,
+} from '@/lib/resources'
 import { listTags } from '@/lib/tags'
 import { listCollections } from '@/lib/collections'
 import { resourceSchema, RESOURCE_TYPES } from '@/lib/validations'
@@ -165,6 +168,7 @@ function AddResourceForm() {
 
     try {
       let fileData = null
+      let uploadedPublicId = null
 
       if (values.resourceType === 'pdf') {
         if (!pdfFile) {
@@ -188,13 +192,26 @@ function AddResourceForm() {
         }
 
         fileData = await uploadPdf(pdfFile)
+        uploadedPublicId = fileData.publicId
       }
 
-      await addResource({
-        ...values,
-        url: values.resourceType === 'pdf' ? '' : values.url,
-        file: fileData,
-      })
+      try {
+        await addResource({
+          ...values,
+          url: values.resourceType === 'pdf' ? '' : values.url,
+          file: fileData,
+        })
+      } catch (originalError) {
+        if (uploadedPublicId) {
+          try {
+            await cleanupSecurePdfUpload(uploadedPublicId)
+          } catch {
+            console.error('Failed to clean up orphaned PDF')
+          }
+        }
+
+        throw originalError
+      }
 
       toast.success('Resource saved')
 
