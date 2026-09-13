@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { MenuIcon, SearchIcon } from 'lucide-react'
+import { MenuIcon, SearchIcon, Star } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import { Button } from './button'
 import {
@@ -50,6 +50,14 @@ export default function Header() {
               activeProps={{ className: 'bg-muted text-foreground' }}
             >
               Library
+            </Link>
+            <Link
+              to="/favorites"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              activeProps={{ className: 'bg-muted text-foreground' }}
+            >
+              <Star className="mr-1 inline size-3.5" />
+              Favorites
             </Link>
             <Link
               to="/collections"
@@ -145,6 +153,15 @@ export default function Header() {
                     </SheetClose>
                     <SheetClose asChild>
                       <Link
+                        to="/favorites"
+                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Star className="mr-2 inline size-4" />
+                        Favorites
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
                         to="/collections"
                         className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                       >
@@ -188,3 +205,5 @@ export default function Header() {
     </header>
   )
 }
+
+
