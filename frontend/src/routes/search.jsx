@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Plus, Search as SearchIcon, X } from 'lucide-react'
 import { toast } from 'sonner'
@@ -21,6 +21,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { listResources, toggleStar } from '@/lib/resources'
 import { listTags } from '@/lib/tags'
 import { listCollections } from '@/lib/collections'
+import { filterResources } from '@/lib/search'
 
 export const Route = createFileRoute('/search')({ component: SearchPage })
 
@@ -94,51 +95,15 @@ function SearchView() {
     }
   }
 
-  const trimmed = query.trim().toLowerCase()
-  const tagNames = useMemo(
-    () => new Map(tags.map((tag) => [tag.id, tag.name || ''])),
-    [tags],
-  )
-  const collectionNames = useMemo(
-    () => new Map(collections.map((collection) => [collection.id, collection.name || ''])),
-    [collections],
-  )
   const filtersActive =
     resourceType !== 'all' || starredOnly || collectionId !== 'all' || tagId !== 'all'
 
-  const results = useMemo(() => {
-    return resources.filter((r) => {
-      const linkedTagNames = (r.tagIds || [])
-        .map((id) => tagNames.get(id))
-        .filter(Boolean)
-      const linkedCollectionNames = (r.collectionIds || [])
-        .map((id) => collectionNames.get(id))
-        .filter(Boolean)
-      const searchableText = [
-        r.title,
-        r.description,
-        r.personalNotes,
-        r.url,
-        r.sourceDomain,
-        r.file?.originalFilename,
-        ...linkedTagNames,
-        ...linkedCollectionNames,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-
-      const matchesQuery = !trimmed || searchableText.includes(trimmed)
-      const matchesType =
-        resourceType === 'all' || (r.resourceType || 'other') === resourceType
-      const matchesStarred = !starredOnly || r.isStarred
-      const matchesCollection =
-        collectionId === 'all' || (r.collectionIds || []).includes(collectionId)
-      const matchesTag = tagId === 'all' || (r.tagIds || []).includes(tagId)
-
-      return matchesQuery && matchesType && matchesStarred && matchesCollection && matchesTag
-    })
-  }, [collectionId, collectionNames, resourceType, resources, starredOnly, tagId, tagNames, trimmed])
+  const results = filterResources(
+    resources,
+    { query, resourceType, starredOnly, collectionId, tagId },
+    tags,
+    collections,
+  )
 
   function resetFilters() {
     setResourceType('all')
