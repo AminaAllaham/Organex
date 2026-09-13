@@ -2,11 +2,9 @@ import { Link } from '@tanstack/react-router'
 import { Star } from 'lucide-react'
 import {
   Card,
-  CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -72,32 +70,35 @@ export default function ResourceCard({
         params={{ id }}
         className="block h-full rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <CardHeader className="gap-2">
-          <CardTitle className="line-clamp-2 pr-8 text-base leading-snug">{title}</CardTitle>
+        <CardContent className="flex flex-col gap-3 py-0">
+          <CardTitle className="line-clamp-2 pr-8 text-base leading-snug">
+            {title}
+          </CardTitle>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs leading-5">
+            <Badge variant="secondary">{TYPE_LABELS[resourceType] ?? 'Other'}</Badge>
+            {sourceDomain && (
+              <span className="text-muted-foreground">{sourceDomain}</span>
+            )}
+          </div>
+
           {description && (
             <CardDescription className="line-clamp-2 leading-5">
               {description}
             </CardDescription>
           )}
-        </CardHeader>
 
-        <CardContent className="flex flex-wrap items-center gap-2 text-xs leading-5">
-          <Badge variant="secondary">{TYPE_LABELS[resourceType] ?? 'Other'}</Badge>
-          {sourceDomain && (
-            <span className="text-muted-foreground">{sourceDomain}</span>
+          {hasLabels && (
+            <div className="flex flex-wrap gap-1.5">
+              {myCollections.map((c) => (
+                <SmallPill key={c.id} color={c.color} name={c.name} />
+              ))}
+              {myTags.map((t) => (
+                <SmallPill key={t.id} color={t.color} name={t.name} />
+              ))}
+            </div>
           )}
         </CardContent>
-
-        {hasLabels && (
-          <CardFooter className="mt-1 flex flex-wrap gap-1.5 pt-0">
-            {myCollections.map((c) => (
-              <SmallPill key={c.id} color={c.color} name={c.name} />
-            ))}
-            {myTags.map((t) => (
-              <SmallPill key={t.id} color={t.color} name={t.name} />
-            ))}
-          </CardFooter>
-        )}
       </Link>
     </Card>
   )
