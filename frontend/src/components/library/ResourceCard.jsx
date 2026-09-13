@@ -25,6 +25,7 @@ export default function ResourceCard({
   tags = [],
   collections = [],
   onStarToggle,
+  className,
 }) {
   const {
     id,
@@ -48,7 +49,7 @@ export default function ResourceCard({
   }
 
   return (
-    <Card className="group relative h-full transition-shadow hover:shadow-md">
+    <Card className={cn('group relative h-full border border-border/80 bg-card shadow-sm transition-shadow hover:shadow-md', className)}>
       {onStarToggle && (
         <button
           type="button"

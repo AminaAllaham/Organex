@@ -263,6 +263,7 @@ function Dashboard({ user }) {
                       resource={resource}
                       tags={tags}
                       collections={collections}
+                      className="border border-border/80 bg-card shadow-sm"
                     />
                   </li>
                 ))}
@@ -287,7 +288,7 @@ function Dashboard({ user }) {
 
 function StatCard({ icon: Icon, label, value }) {
   return (
-    <Card>
+    <Card className="border border-border/80 bg-card shadow-sm">
       <CardContent className="flex items-center gap-3 pt-4">
         <div className="rounded-lg bg-primary/10 p-2 text-primary">
           <Icon className="size-4" />
