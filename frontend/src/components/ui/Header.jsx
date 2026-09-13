@@ -1,19 +1,32 @@
 import { Link, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import { toast } from 'sonner'
+import { MenuIcon } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import { Button } from './button'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from './sheet'
 import { useAuth } from '@/hooks/useAuth'
 import { signOut } from '@/lib/auth'
 
 export default function Header() {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   async function handleLogout() {
     try {
       await signOut()
       toast.success('Signed out')
       navigate({ to: '/' })
+      setMobileMenuOpen(false)
     } catch {
       toast.error('Failed to sign out. Try again.')
     }
@@ -73,9 +86,86 @@ export default function Header() {
               >
                 {user.displayName || user.email}
               </Link>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button
+                className="hidden sm:inline-flex"
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
                 Sign out
               </Button>
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="sm:hidden"
+                    aria-label="Open navigation menu"
+                  >
+                    <MenuIcon />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="sm:hidden">
+                  <SheetHeader>
+                    <SheetTitle>{user.displayName || user.email}</SheetTitle>
+                  </SheetHeader>
+                  <nav className="flex flex-col gap-1 px-4" aria-label="Mobile navigation">
+                    <SheetClose asChild>
+                      <Link
+                        to="/"
+                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        Home
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
+                        to="/library"
+                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        Library
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
+                        to="/collections"
+                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        Collections
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
+                        to="/tags"
+                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        Tags
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
+                        to="/search"
+                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        Search
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link
+                        to="/profile"
+                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        Profile
+                      </Link>
+                    </SheetClose>
+                  </nav>
+                  <SheetFooter>
+                    <Button variant="outline" onClick={handleLogout}>
+                      Sign out
+                    </Button>
+                  </SheetFooter>
+                </SheetContent>
+              </Sheet>
             </>
           )}
 
