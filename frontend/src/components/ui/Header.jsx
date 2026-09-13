@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { MenuIcon } from 'lucide-react'
+import { MenuIcon, SearchIcon } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import { Button } from './button'
 import {
@@ -65,17 +65,34 @@ export default function Header() {
             >
               Tags
             </Link>
-            <Link
-              to="/search"
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              activeProps={{ className: 'bg-muted text-foreground' }}
-            >
-              Search
-            </Link>
           </div>
         )}
 
         <div className="flex items-center gap-2">
+          {!loading && user && (
+            <>
+              <Button
+                asChild
+                variant="outline"
+                className="hidden h-8 w-48 justify-start gap-2 px-2.5 text-muted-foreground sm:flex"
+              >
+                <Link to="/search" aria-label="Search your library">
+                  <SearchIcon className="size-4" />
+                  <span>Search your library...</span>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="icon"
+                className="sm:hidden"
+              >
+                <Link to="/search" aria-label="Search your library">
+                  <SearchIcon />
+                </Link>
+              </Button>
+            </>
+          )}
           <ThemeToggle />
 
           {!loading && user && (
@@ -140,14 +157,6 @@ export default function Header() {
                         className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                       >
                         Tags
-                      </Link>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Link
-                        to="/search"
-                        className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                      >
-                        Search
                       </Link>
                     </SheetClose>
                     <SheetClose asChild>
