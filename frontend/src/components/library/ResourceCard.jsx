@@ -72,16 +72,16 @@ export default function ResourceCard({
         params={{ id }}
         className="block h-full rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <CardHeader>
-          <CardTitle className="line-clamp-2 pr-8 text-base">{title}</CardTitle>
+        <CardHeader className="gap-2">
+          <CardTitle className="line-clamp-2 pr-8 text-base leading-snug">{title}</CardTitle>
           {description && (
-            <CardDescription className="line-clamp-2">
+            <CardDescription className="line-clamp-2 leading-5">
               {description}
             </CardDescription>
           )}
         </CardHeader>
 
-        <CardContent className="flex flex-wrap items-center gap-2 text-xs">
+        <CardContent className="flex flex-wrap items-center gap-2 text-xs leading-5">
           <Badge variant="secondary">{TYPE_LABELS[resourceType] ?? 'Other'}</Badge>
           {sourceDomain && (
             <span className="text-muted-foreground">{sourceDomain}</span>
@@ -89,7 +89,7 @@ export default function ResourceCard({
         </CardContent>
 
         {hasLabels && (
-          <CardFooter className="flex flex-wrap gap-1 pt-0">
+          <CardFooter className="mt-1 flex flex-wrap gap-1.5 pt-0">
             {myCollections.map((c) => (
               <SmallPill key={c.id} color={c.color} name={c.name} />
             ))}
